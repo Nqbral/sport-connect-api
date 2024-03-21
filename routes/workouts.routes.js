@@ -22,6 +22,21 @@ router.get("/owner", isAuthenticated, async (req, res, next) => {
   }
 });
 
+// GET /api/workouts/user/:userid - Retrieves the workouts of an user using its identifier
+router.get("/user/:userid", isAuthenticated, async (req, res, next) => {
+  try {
+    const { userid } = req.params;
+
+    const workouts = await Workout.find({ create_user: userid })
+      .populate("create_user", { _id: 0, name: 1 })
+      .populate("exercises.exercise");
+
+    res.status(200).json(workouts);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // GET /api/workouts/:workoutId - Retrieves a specific workout by id
 router.get("/:workoutId", isAuthenticated, async (req, res, next) => {
   try {
@@ -33,7 +48,7 @@ router.get("/:workoutId", isAuthenticated, async (req, res, next) => {
     }
 
     const workout = await Workout.findById(workoutId)
-      .populate("create_user", { _id: 0, name: 1 })
+      .populate("create_user")
       .populate("exercises.exercise");
 
     res.status(200).json(workout);
@@ -57,7 +72,7 @@ router.post("/", isAuthenticated, async (req, res, next) => {
 
     await createFeedPost(
       req,
-      `a créé un nouveau programme d'entraînement nommé ${name}.`,
+      `a créé un nouveau programme d'entraînement nommé ${name}`,
       createdWorkout._id.toString()
     );
 
@@ -90,7 +105,7 @@ router.put("/:workoutId", isAuthenticated, async (req, res, next) => {
 
     await createFeedPost(
       req,
-      `a mis à jour le programme d'entraînement nommé ${name}.`,
+      `a mis à jour le programme d'entraînement nommé ${name}`,
       workoutId
     );
 
@@ -114,7 +129,7 @@ router.delete("/:workoutId", isAuthenticated, async (req, res, next) => {
 
     await createFeedPost(
       req,
-      `a supprimé le programme d'entraînement nommé ${deletedWorkout.name}.`
+      `a supprimé le programme d'entraînement nommé ${deletedWorkout.name}`
     );
 
     const feedPostsLinkedToWorkout = await FeedPost.updateMany(
