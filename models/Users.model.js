@@ -10,6 +10,15 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+  firstname: {
+    type: String,
+  },
+  lastname: {
+    type: String,
+  },
+  birthdate: {
+    type: Date,
+  },
 });
 
 const User = model("User", userSchema);
