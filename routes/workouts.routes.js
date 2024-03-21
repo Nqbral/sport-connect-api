@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 
 const { isAuthenticated } = require("./../middleware/jwt.middleware.js");
 
+const FeedPost = require("../models/FeedPosts.model");
+const User = require("../models/Users.model");
 const Workout = require("../models/Workouts.model");
 
 // GET /api/workouts/owner - Retrieves the workouts of the authenticated user
@@ -53,6 +55,12 @@ router.post("/", isAuthenticated, async (req, res, next) => {
       exercises: exercises,
     });
 
+    await createFeedPost(
+      req,
+      `a créé un nouveau programme d'entraînement nommé ${name}.`,
+      createdWorkout._id.toString()
+    );
+
     res.status(201).json({ message: "Workout created", data: createdWorkout });
   } catch (error) {
     next(error);
@@ -80,6 +88,12 @@ router.put("/:workoutId", isAuthenticated, async (req, res, next) => {
       { new: true }
     );
 
+    await createFeedPost(
+      req,
+      `a mis à jour le programme d'entraînement nommé ${name}.`,
+      workoutId
+    );
+
     res.status(200).json({ message: "Workout edited", data: editedWorkout });
   } catch (error) {
     next(error);
@@ -98,10 +112,33 @@ router.delete("/:workoutId", isAuthenticated, async (req, res, next) => {
 
     const deletedWorkout = await Workout.findByIdAndDelete(workoutId);
 
+    await createFeedPost(
+      req,
+      `a supprimé le programme d'entraînement nommé ${deletedWorkout.name}.`
+    );
+
+    const feedPostsLinkedToWorkout = await FeedPost.updateMany(
+      { workout_linked: workoutId },
+      { workout_linked: null }
+    );
+
     res.status(200).json({ message: "Workout deleted", data: deletedWorkout });
   } catch (error) {
     next(error);
   }
 });
+
+// Create a feed post when creating/updating/deleting a workout
+async function createFeedPost(req, message, workoutId = null) {
+  const userId = req.user._id;
+
+  const user = await User.findById(userId);
+
+  await FeedPost.create({
+    create_user: userId,
+    message: `L'utilisateur ${user.name} ${message}.`,
+    workout_linked: workoutId,
+  });
+}
 
 module.exports = router;
