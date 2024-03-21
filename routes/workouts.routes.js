@@ -5,6 +5,7 @@ const { isAuthenticated } = require("./../middleware/jwt.middleware.js");
 
 const Workout = require("../models/Workouts.model");
 
+// GET /api/workouts/owner - Retrieves the workouts of the authenticated user
 router.get("/owner", isAuthenticated, async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -19,6 +20,7 @@ router.get("/owner", isAuthenticated, async (req, res, next) => {
   }
 });
 
+// GET /api/workouts/:workoutId - Retrieves a specific workout by id
 router.get("/:workoutId", isAuthenticated, async (req, res, next) => {
   try {
     const { workoutId } = req.params;
@@ -38,6 +40,7 @@ router.get("/:workoutId", isAuthenticated, async (req, res, next) => {
   }
 });
 
+// POST /api/workouts - Create a new workout
 router.post("/", isAuthenticated, async (req, res, next) => {
   try {
     const userId = req.user._id;
@@ -56,6 +59,7 @@ router.post("/", isAuthenticated, async (req, res, next) => {
   }
 });
 
+// PUT /api/workouts/:workoutId - Updates a specific workout by id
 router.put("/:workoutId", isAuthenticated, async (req, res, next) => {
   try {
     const { workoutId } = req.params;
@@ -82,6 +86,7 @@ router.put("/:workoutId", isAuthenticated, async (req, res, next) => {
   }
 });
 
+// DELETE /api/workouts/:workoutId - Deletes a specific workout by id
 router.delete("/:workoutId", isAuthenticated, async (req, res, next) => {
   try {
     const { workoutId } = req.params;
