@@ -8,6 +8,7 @@ const feedPostSchema = new Schema({
   message: {
     type: String,
     required: true,
+    maxLength: 200,
   },
   date: {
     type: String,
