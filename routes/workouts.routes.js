@@ -22,6 +22,30 @@ router.get("/owner", isAuthenticated, async (req, res, next) => {
   }
 });
 
+// GET /api/workouts/search/:search&:page - Retrieves a list of workouts with name like name searched
+router.get("/search/:search&:page", isAuthenticated, async (req, res, next) => {
+  try {
+    const { search, page } = req.params;
+
+    let perPage = 20;
+    pageSelected = Math.max(0, page);
+
+    const rgx = (pattern) => new RegExp(`.*${pattern}.*`);
+    const searchRgx = rgx(search);
+
+    const users = await Workout.find({
+      name: { $regex: searchRgx, $options: "i" },
+    })
+      .limit(perPage)
+      .skip(perPage * pageSelected)
+      .populate("create_user", { _id: 0, name: 1 });
+
+    res.status(200).json(users);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // GET /api/workouts/user/:userid - Retrieves the workouts of an user using its identifier
 router.get("/user/:userid", isAuthenticated, async (req, res, next) => {
   try {
