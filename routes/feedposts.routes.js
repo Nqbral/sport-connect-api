@@ -59,4 +59,29 @@ router.get("/:page", isAuthenticated, async (req, res, next) => {
   }
 });
 
+// POST /api/feedposts/ - Create a new feedpost
+router.post("/", isAuthenticated, async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+
+    const { message } = req.body;
+
+    const createdFeedPost = await FeedPost.create({
+      create_user: userId,
+      message: message,
+      workout_linked: null,
+    });
+
+    let returnedFeedPost = await FeedPost.findById(
+      createdFeedPost._id
+    ).populate("create_user", { name: 1 });
+
+    res
+      .status(201)
+      .json({ message: "Feedpost created", data: returnedFeedPost });
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
