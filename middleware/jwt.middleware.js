@@ -4,11 +4,19 @@ const User = require("../models/Users.model");
 // Instantiate the JWT token validation middleware
 const isAuthenticated = (req, res, next) => {
   try {
+    const { authorization } = req.headers;
+
+    if (!authorization) {
+      res.status(401).json({ error: "You must be logged in." });
+      return;
+    }
+
     const token = req.headers.authorization.split(" ")[1]; // get the token from headers "Bearer 123XYZ..."
 
     jwt.verify(token, process.env.SECRET_KEY, async (err, payload) => {
       if (err) {
         res.status(401).json({ error: "You must be logged in." });
+        return;
       }
 
       const { userId } = payload;
