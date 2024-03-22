@@ -20,6 +20,33 @@ router.get("/:username", isAuthenticated, async (req, res, next) => {
   }
 });
 
+// GET /api/users/search/:search&:page - Retrieves a list of users with name like name searched
+router.get("/search/:search&:page", isAuthenticated, async (req, res, next) => {
+  try {
+    const { search, page } = req.params;
+
+    let perPage = 20;
+    pageSelected = Math.max(0, page);
+
+    const rgx = (pattern) => new RegExp(`.*${pattern}.*`);
+    const searchRgx = rgx(search);
+
+    const users = await User.find({
+      $or: [
+        { name: { $regex: searchRgx, $options: "i" } },
+        { firstname: { $regex: searchRgx, $options: "i" } },
+        { lastname: { $regex: searchRgx, $options: "i" } },
+      ],
+    })
+      .limit(perPage)
+      .skip(perPage * pageSelected);
+
+    res.status(200).json(users);
+  } catch (error) {
+    next(error);
+  }
+});
+
 // PUT /api/users/edit_informations - Edit user information (firstname, name, birthdate) of an user
 router.put("/edit_informations", isAuthenticated, async (req, res, next) => {
   try {
