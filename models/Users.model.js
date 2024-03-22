@@ -18,6 +18,7 @@ const userSchema = new Schema({
   },
   birthdate: {
     type: Date,
+    default: null,
   },
 });
 
